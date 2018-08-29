@@ -1,0 +1,27 @@
+.upload-file-wrapper {
+  width: 80%;
+  height: 170px;
+  margin: 1rem auto;
+  border: 1px solid #ccc;
+  display: flex;
+  .upload-file {
+    flex: 1;
+    height: 120px;
+    margin: .5rem;
+    .ant-upload-drag-icon {
+      margin-bottom: .1rem!important;
+    }
+  }
+  .file-info {
+    width: 70%;
+    margin: .5rem;
+    .title {
+      font-size: 1.2rem;
+      text-align: center;
+      margin-bottom: .5rem;
+    }
+    .file-common {
+      padding-left: 1rem
+    }
+  }
+}

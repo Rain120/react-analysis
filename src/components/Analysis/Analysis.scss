@@ -1,0 +1,25 @@
+.analysis-wrapper {
+  .algorithms {
+    .singlei-list {
+      display: flex;
+      .list {
+        width: 6rem;
+      }
+      .more-params {
+        width: 3rem;
+      }
+      .params {
+        flex: 1;
+        margin-top: -.2rem;
+        .param {
+          list-style: none;
+          width: 15rem;
+          margin-bottom: .2rem;
+          .title {
+            margin-right: 1rem;
+          }
+        }
+      }
+    }
+  }
+}
