@@ -1,6 +1,7 @@
 import { Tabs, Modal } from 'antd';
 import * as React from 'react';
 import Analysis from "../Analysis/Analysis";
+import Charts from "../Charts/Charts";
 import './Platform.scss';
 
 const TabPane = Tabs.TabPane;
@@ -16,6 +17,7 @@ export default class Platform extends React.PureComponent {
   public state = {
     activeKey: this.panes[0].key,
     panes: this.panes,
+    demo: true,
   };
 
   constructor(props) {
@@ -71,10 +73,11 @@ export default class Platform extends React.PureComponent {
   }
 
   public render() {
-    const { activeKey, panes } = this.state
+    const { activeKey, panes, demo, } = this.state
     return (
       <div className="platform-wrapper">
         <Tabs
+          style={{border: '1px solid #ccc'}}
           onChange={this.onChange}
           activeKey={activeKey}
           type="editable-card"
@@ -84,6 +87,8 @@ export default class Platform extends React.PureComponent {
             panes.map(pane => 
               <TabPane tab={pane.title} key={pane.key}>
                 <Analysis/>
+                <p className="data-title">{ demo ? '样本数据' : '分析结果' }</p>
+                <Charts />
               </TabPane>)
             }
         </Tabs>

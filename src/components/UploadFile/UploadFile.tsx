@@ -74,7 +74,7 @@ export default class UploadFile extends React.PureComponent {
       <div className="upload-file-wrapper">
         <div className="upload-file">
           <Dragger {...props}>
-            <div onClick={this.showUploadConfirm}>
+            <div>
               <p className="ant-upload-drag-icon">
                 <Icon type="inbox" />
               </p>
