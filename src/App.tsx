@@ -1,6 +1,6 @@
 import * as React from 'react';
-import UploadFile from './components/UploadFile/UploadFile';
-import Platform from './components/Platform/Platform';
+import UploadFile from 'src/components/UploadFile/UploadFile';
+import Platform from 'src/components/Platform/Platform';
 
 class App extends React.Component {
   public render() {
