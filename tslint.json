@@ -12,8 +12,9 @@
     "object-literal-sort-keys": false,
     "no-console": false,
     "no-shadowed-variable": false,
-    "jsx-no-lambda": true,
+    "jsx-no-lambda": false,
     "variable-name": false,
-    "interface-name": [true, "never-prefix"]
+    "interface-name": [true, "never-prefix"],
+    "no-bitwise": false
   }
 }

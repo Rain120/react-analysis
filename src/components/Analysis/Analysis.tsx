@@ -1,201 +1,241 @@
-import { 
-  Checkbox,
-  Icon, 
-  Select, 
-  Button, 
-  Tooltip, 
-  InputNumber, 
-  Collapse, 
-  Slider, 
-  Row, 
-  Col 
-} from 'antd';
 import * as React from 'react';
-import classNames from "classnames";
+import {
+  Button,
+} from 'antd';
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  YAxis,
+  Line,
+  Brush,
+  CartesianGrid,
+  LineChart,
+} from "recharts";
+import AnalysisHeader from "../AnalysisHeader/AnalysisHeader";
+import Charts from "../Charts/Charts";
+import classNames from 'classnames';
 import './Analysis.scss';
 
-const CheckboxGroup = Checkbox.Group;
-const Option = Select.Option;
-const Panel = Collapse.Panel;
+interface AnalysisProps {
+  show?: any
+}
 
-export default class Analysis extends React.PureComponent {
-  public lists = ["CDFC", "isolation_forest", "3Sigma"];
+export default class Analysis extends React.PureComponent<AnalysisProps> {
+  public dataDemo = [
+    {
+      // time: moment(1523203140000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1523203,
+      uv: 4000,
+      limit: [2400, 3000],
+      ano: 4000
+    },
+    {
+      // time: moment(1523803180000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1523303,
+      uv: 3000,
+      limit: [-3200, 5398],
+      ano: 3000
+    },
+    {
+      // time: moment(1523803240000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1523403,
+      uv: 3000,
+      limit: [-3200, 5398],
+      ano: 3000
+    },
+  
+    {
+      // time: moment(1523803300000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1523503,
+      uv: 3000,
+      limit: [-3200, 5398],
+      ano: 3000
+    },
+  
+    {
+      // time: moment(1523803350000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1523603,
+      uv: 3000,
+      limit: [-3200, 5398],
+      ano: 3000
+    },
+  
+    {
+      // time: moment(1523803400000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1523703,
+      uv: 3000,
+      limit: [-3200, 5398],
+      ano: 3000
+    },
+    {
+      // time: moment(1523963480000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1523803,
+      uv: 2000,
+      limit: [5600, 9800]
+    },
+    {
+      // time: moment(1532203500000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1523903,
+      uv: 2780,
+      limit: [-2800, 1908],
+      ano: 2780
+    },
+    {
+      // time: moment(1532203510000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1524003,
+      uv: 1890,
+      limit: [1200, 4800],
+      ano: 1890
+    },
+    {
+      // time: moment(1532203520000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1524103,
+      uv: 2390,
+      limit: [-3500, 1800]
+    },
+    {
+      // time: moment(1532203522000).format("YYYY-MM-DD hh:mm:ss"),
+      time: 1524203,
+      uv: 3490,
+      limit: [-2800, 2300],
+      ano: 3490
+    }
+  ];
+
   public state = {
-    value: 0.01,
-    inputValue: 0.01,
-    checkedList: [],
-    indeterminate: false,
-    checkAll: false,
-    currentFeatures: 'analysis'
-  }
+    demo: true,
+    data: this.dataDemo,
+    left : 'dataMin',
+    right : 'dataMax',
+    refAreaLeft : '',
+    refAreaRight : '',
+    top : 'dataMax+1',
+    bottom : 'dataMin-1',
+    animation : true
+  };
 
   constructor(props) {
-    super(props);
+    super(props)
   }
 
-  public onChangeChecked = checkedList => {
-    this.setState({
-      checkedList,
-      indeterminate:
-        !!checkedList.length && checkedList.length < this.lists.length,
-      checkAll: checkedList.length === this.lists.length
+  public getAxisYDomain = (from, to, ref, offset) => {
+    const { data } = this.state;
+    const dataSlice = data.slice(from - 1, to);
+    let [ bottom, top ] = [ dataSlice[0][ref], dataSlice[0][ref] ];
+    dataSlice.forEach( d => {
+      if ( d[ref] > top ) {
+        top = d[ref];
+      }
+      if ( d[ref] < bottom ) {
+        bottom = d[ref];
+      }
     });
+    return [ (bottom | 0) - offset, (top | 0) + offset ]
   };
 
-  public onCheckAllChange = e => {
-    this.setState({
-      checkedList: e.target.checked ? this.lists : [],
-      indeterminate: false,
-      checkAll: e.target.checked
-    });
-  };
-
-  public changeOptions = value => {
-    if (value === void 0 || value === '') {
-      value = 'analysis'
-    }
-    console.log(value);
-    this.setState({
-      currentFeatures: value
-    })
-  }
-
-  public changeParamValue = value => {
-    this.setState({
-      value
-    })
-  }
-
-  public onChange = (value) => {
-    if (isNaN(value)) {
-      return;
-    }
-    this.setState({
-      inputValue: value,
-    });
-  }
-
-  public selectFeature = option => {
-    const { currentFeatures } = this.state;
-    return currentFeatures === option ? 'show' : 'hide';
-  }
-
-  public render() {
-    const { 
-      indeterminate, 
-      checkAll, 
-      checkedList, 
-      inputValue,
+  public zoom = () => {  
+  	const { 
+      data
     } = this.state;
+    let {
+      refAreaLeft,
+      refAreaRight,
+    } = this.state
+
+		if ( refAreaLeft === refAreaRight || refAreaRight === '' ) {
+    	this.setState({
+      	refAreaLeft : '',
+        refAreaRight : '',
+      })
+    	return;
+    }
+
+	  if ( refAreaLeft > refAreaRight ) {
+      [ refAreaLeft, refAreaRight ] = [ refAreaRight, refAreaLeft ];
+    }
+
+    const [ bottom, top ] = this.getAxisYDomain( refAreaLeft, refAreaRight, 'cost', 1 );
+    
+    this.setState( () => ({
+      refAreaLeft : '',
+      refAreaRight : '',
+    	data : data.slice(),
+      left : refAreaLeft,
+      right : refAreaRight,
+      bottom, 
+      top,
+    }));
+  };
+
+  public reset = () => {
+    console.log('reset');
+    const { data } = this.state;
+  	this.setState( () => ({
+      data : data.slice(),
+      refAreaLeft : '',
+      refAreaRight : '',
+      left : 'dataMin',
+      right : 'dataMax',
+      top : 'dataMax+1',
+      bottom : 'dataMin',
+    }) );
+  }
+
+  public render () {
+    const { 
+      demo,
+      data
+    } = this.state
+
+    const {
+      show
+    } = this.props
 
     return (
-      <div className="analysis-wrapper">
-        <div className="features">
-          <div className="options">
-            <Select defaultValue="analysis" onChange={this.changeOptions}>
-              <Option value="analysis">离线分析</Option>
-              <Option value="predict" disabled={true}>异常预测</Option>
-            </Select>
-          </div>
-          <div className={classNames("analysis", this.selectFeature('analysis'))}>
-            <Button
-              className="upload-demo-start"
-              type="primary">
-              Analysis
-            </Button>
-          </div>
-          <div className={classNames("predict", this.selectFeature('predict'))}>
-            <Button
-              className="upload-demo-start"
-              type="primary">
-              Predict
-            </Button>
-          </div>
+      <div className={classNames("analysis-wrapper", show)}>
+        <div className="ret-title">
+          <p className="hint-title">{ demo ? '样本数据' : '分析结果' }</p>
         </div>
-        <div className={classNames("algorithms", this.selectFeature('analysis'))}>
-          <div className="all-lists">
-            <Checkbox
-              indeterminate={indeterminate}
-              onChange={this.onCheckAllChange}
-              checked={checkAll}
+        <AnalysisHeader />
+        <div className="charts-header">
+          <div className="reset">
+            <Button 
+            type="primary"
+            onClick={this.reset}
             >
-              全选
-            </Checkbox>
+              重置
+            </Button>
           </div>
-          <CheckboxGroup
-            value={checkedList}
-            onChange={this.onChangeChecked}>
-          {
-            this.lists.map((item, index) => (
-              <div className="single-list" key={index}>
-                <div className="list">
-                  <div className="algorithm-name">
-                    <Checkbox value={item}>
-                      <span>{item}</span>
-                    </Checkbox>
-                  </div>
-                  <div className="more-params">
-                    <Collapse>
-                      <Panel header="高级" key={index.toString()}>
-                        <ul className="params">
-                          <li className="param">
-                            <Tooltip placement="leftTop" title={<span>范围：(0, 0.5)，步长：0.01</span>}>
-                              <Icon type="info-circle" />&nbsp;<span className="title">K:</span>
-                            </Tooltip>
-                            <InputNumber 
-                              style={{marginLeft: '.6rem', width: '5rem'}}
-                              defaultValue={0.01}
-                              step={0.01}
-                              min={0}
-                              max={0.5}
-                              onChange={this.changeParamValue}/>
-                          </li>
-                          <li className="param">
-                            <Tooltip placement="leftTop" title={<span>范围：(0, 0.5)，步长：0.01</span>}>
-                              <Icon type="info-circle" />&nbsp;<span className="title">M:</span>
-                            </Tooltip>
-                            <Row className="slider-param">
-                                <Col span={18}>
-                                  <Slider
-                                    min={0}
-                                    max={.5}
-                                    onChange={this.onChange}
-                                    value={inputValue}
-                                    step={0.01}
-                                  />
-                                </Col>
-                                <Col span={1}>
-                                  <InputNumber
-                                    style={{marginLeft: '.4rem'}}
-                                    min={0}
-                                    max={0.5}
-                                    step={0.01}
-                                    value={inputValue}
-                                    onChange={this.onChange}
-                                  />
-                                </Col>
-                            </Row>
-                          </li>
-                          <li className="param">
-                            <Tooltip placement="leftTop" title={<span>范围：(0, 0.5)，步长：0.01</span>}>
-                              <Icon type="info-circle" />&nbsp;<span className="title">I:</span>
-                            </Tooltip>
-                            <Select
-                              style={{marginLeft: '.7rem'}}
-                              defaultValue="test">
-                              <Option value="test">离线分析</Option>
-                              <Option value="tmp">异常预测</Option>
-                            </Select>
-                          </li>
-                        </ul>
-                      </Panel>
-                    </Collapse>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CheckboxGroup>
+          <ResponsiveContainer
+            className="brush"
+            width="100%"
+            height={60}
+          >
+            <ComposedChart
+              data={data}
+              syncId="analysis-result"
+              onMouseDown = { 
+                e => this.setState({refAreaLeft: e.activeLabel})
+              }
+              onMouseMove = { 
+                e => this.state.refAreaLeft && this.setState({refAreaRight: e.activeLabel}) 
+              }
+              onMouseUp = { this.zoom }
+            >
+              <Line type="monotone" dataKey="uv" name="原始值" stroke="#fff" />
+              <Brush name="原始值" dataKey="time">
+                <LineChart syncId="compare">
+                  <CartesianGrid stroke="#f5f5f5" fill="#e6e6e6" />
+                  <YAxis hide={true} domain={["auto", "auto"]} />
+                  <Line type="monotone" dataKey="uv" name="原始值" stroke="#7eb26d" />
+                </LineChart>
+              </Brush>
+            </ComposedChart>
+          </ResponsiveContainer>
+          <div style={{width: '4%'}} />
         </div>
+        <Charts data={data} />
+        <Charts data={data} />
       </div>
     )
   }
