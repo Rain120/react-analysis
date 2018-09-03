@@ -1,0 +1,56 @@
+.analysis-wrapper {
+  .algorithms {
+    margin-left: .5rem;
+    .single-list {
+      float: left;
+      margin: .5rem 2rem 0 0;
+      .list {
+        width: 20rem;
+        display: flex;
+        .algorithm-name {
+          width: 10rem;
+        }
+        .more-params {
+          flex: 1;
+          .ant-collapse{
+            border: none;
+            background: #fff;
+            .ant-collapse-item {
+              border-bottom: none;
+              .ant-collapse-header {
+                padding: 0;
+                .arrow {
+                  top: -.8rem;
+                  left: 2rem;
+                }
+              }
+              .ant-collapse-content {
+                overflow: inherit;
+                border: none;
+                .ant-collapse-content-box {
+                  padding: .3rem .2rem;
+                  .params {
+                    margin-left: -2.5rem;
+                    .param {
+                      height: 2.6rem;
+                      line-height: 2.6rem;
+                      list-style: none;
+                      margin-bottom: .2rem;
+                      .slider-param {
+                        float: right;
+                        .ant-col-18 {
+                          margin-left: -1.2rem;
+                          width: 90%;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
