@@ -15,6 +15,7 @@
     "jsx-no-lambda": false,
     "variable-name": false,
     "interface-name": [true, "never-prefix"],
-    "no-bitwise": false
+    "no-bitwise": false,
+    "prefer-const": false
   }
 }

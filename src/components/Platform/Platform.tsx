@@ -7,7 +7,6 @@ import {
 import * as React from 'react';
 import classNames from 'classnames'
 import Analysis from "../Analysis/Analysis";
-// import moment from "moment";
 import './Platform.scss';
 
 const TabPane = Tabs.TabPane;
