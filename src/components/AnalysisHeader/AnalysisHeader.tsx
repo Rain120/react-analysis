@@ -1,24 +1,28 @@
+/*
+ * @Author: Rain120 
+ * @Date: 2018-08-31 09:31:24 
+ * @Last Modified by: Rain120
+ * @Last Modified time: 2018-09-06 22:55:47
+ */
 import { 
   Checkbox,
   Icon, 
-  Select, 
   Tooltip, 
   InputNumber, 
   Collapse, 
-  Slider, 
-  Row, 
-  Col 
 } from 'antd';
 import * as React from 'react';
 import classNames from "classnames";
 import './AnalysisHeader.scss';
 
 const CheckboxGroup = Checkbox.Group;
-const Option = Select.Option;
 const Panel = Collapse.Panel;
 
-export default class AnalysisHeader extends React.PureComponent {
-  public lists = ["CDFC", "isolation_forest", "3Sigma"];
+
+interface AnalysisHeaderProps {
+  lists?: any,
+}
+export default class AnalysisHeader extends React.PureComponent<AnalysisHeaderProps> {
   public state = {
     value: 0.01,
     inputValue: 0.01,
@@ -32,17 +36,19 @@ export default class AnalysisHeader extends React.PureComponent {
   }
 
   public onChangeChecked = checkedList => {
+    const { lists } = this.props;
     this.setState({
       checkedList,
       indeterminate:
-        !!checkedList.length && checkedList.length < this.lists.length,
-      checkAll: checkedList.length === this.lists.length
+        !!checkedList.length && checkedList.length < lists.length,
+      checkAll: checkedList.length === lists.length
     });
   };
 
   public onCheckAllChange = e => {
+    const { lists } = this.props;
     this.setState({
-      checkedList: e.target.checked ? this.lists : [],
+      checkedList: e.target.checked ? lists : [],
       indeterminate: false,
       checkAll: e.target.checked
     });
@@ -63,18 +69,26 @@ export default class AnalysisHeader extends React.PureComponent {
     });
   }
 
+  public moreParams(params) {
+    return null !== params ? "show" : "hide";
+  }
+
+  public dWidth(params) {
+    return null !== params ? "large-width" : "small-width";
+  }
+
   public render() {
     const { 
       indeterminate, 
       checkAll, 
       checkedList, 
-      inputValue,
     } = this.state;
+
+    const { lists } = this.props;
 
     return (
       <div className="analysis-wrapper">
-      <div className={classNames("algorithms")}
-        >
+        <div className={classNames("algorithms")}>
           <div className="all-lists">
             <Checkbox
               indeterminate={indeterminate}
@@ -88,70 +102,39 @@ export default class AnalysisHeader extends React.PureComponent {
             value={checkedList}
             onChange={this.onChangeChecked}>
           {
-            this.lists.map((item, index) => (
-              <div className="single-list" key={index}>
-                <div className="list">
+            lists.map((item: any) => item.name && (
+              <div className="single-list" key={item.name}>
+                <div className={classNames("list", this.dWidth(item.params))}>
                   <div className="algorithm-name">
-                    <Checkbox value={item}>
-                      <span>{item}</span>
+                    <Checkbox value={item.name}>
+                      <Tooltip placement="bottomRight" title={item.description}>
+                        <span>{item.name}</span>
+                      </Tooltip>
                     </Checkbox>
                   </div>
-                  <div className="more-params">
-                    <Collapse>
-                      <Panel header="高级" key={index.toString()}>
-                        <ul className="params">
-                          <li className="param">
-                            <Tooltip placement="leftTop" title={<span>范围：(0, 0.5)，步长：0.01</span>}>
-                              <Icon type="info-circle" />&nbsp;<span className="title">K:</span>
-                            </Tooltip>
-                            <InputNumber 
-                              style={{marginLeft: '.6rem', width: '5rem'}}
-                              defaultValue={0.01}
-                              step={0.01}
-                              min={0}
-                              max={0.5}
-                              onChange={this.changeParamValue}/>
-                          </li>
-                          <li className="param">
-                            <Tooltip placement="leftTop" title={<span>范围：(0, 0.5)，步长：0.01</span>}>
-                              <Icon type="info-circle" />&nbsp;<span className="title">M:</span>
-                            </Tooltip>
-                            <Row className="slider-param">
-                                <Col span={18}>
-                                  <Slider
-                                    min={0}
-                                    max={.5}
-                                    onChange={this.onChange}
-                                    value={inputValue}
-                                    step={0.01}
-                                  />
-                                </Col>
-                                <Col span={1}>
-                                  <InputNumber
-                                    style={{marginLeft: '.4rem'}}
-                                    min={0}
-                                    max={0.5}
-                                    step={0.01}
-                                    value={inputValue}
-                                    onChange={this.onChange}
-                                  />
-                                </Col>
-                            </Row>
-                          </li>
-                          <li className="param">
-                            <Tooltip placement="leftTop" title={<span>范围：(0, 0.5)，步长：0.01</span>}>
-                              <Icon type="info-circle" />&nbsp;<span className="title">I:</span>
-                            </Tooltip>
-                            <Select
-                              style={{marginLeft: '.7rem'}}
-                              defaultValue="test">
-                              <Option value="test">离线分析</Option>
-                              <Option value="tmp">异常预测</Option>
-                            </Select>
-                          </li>
-                        </ul>
-                      </Panel>
-                    </Collapse>
+                  <div className={classNames("more-params", this.moreParams(item.params))}>
+                    {
+                      item.params && item.params.map((item: any) => (
+                        <Collapse key={item.name}>
+                          <Panel header="高级" key={item.name}>
+                            <ul className="params">
+                              <li className="param">
+                                <Tooltip placement="leftTop" title={<span>{item.desc}</span>}>
+                                  <Icon type="info-circle" />&nbsp;<span className="title">{item.name}:</span>
+                                </Tooltip>
+                                <InputNumber 
+                                  style={{marginLeft: '.6rem', width: '5rem'}}
+                                  defaultValue={0.01}
+                                  step={0.01}
+                                  min={0}
+                                  max={0.5}
+                                  onChange={this.changeParamValue}/>
+                              </li>
+                            </ul>
+                          </Panel>
+                        </Collapse>
+                      ))
+                    }
                   </div>
                 </div>
               </div>

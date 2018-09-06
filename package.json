@@ -48,7 +48,9 @@
     "node-sass": "^4.9.3",
     "classnames": "^2.2.6",
     "lodash": "^4.17.10",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "react-scripts": "^1.1.5",
+    "axios": "^0.18.0"
   },
   "scripts": {
     "start": "node scripts/start.js",
@@ -110,5 +112,6 @@
     "presets": [
       "react-app"
     ]
-  }
+  },
+  "proxy": "http://192.168.1.204:23456"
 }

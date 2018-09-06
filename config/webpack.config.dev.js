@@ -287,4 +287,15 @@ module.exports = {
   performance: {
     hints: false,
   },
+  devServer:{
+    proxy:{
+      '/api':{
+          target: 'http://192.168.1.204:23456/',
+          changeOrigin: true,
+          pathRewrite: {
+            'api': 'api'
+          }
+      }
+    }
+  }
 };

@@ -1,147 +1,124 @@
+/*
+ * @Author: Rain120 
+ * @Date: 2018-09-04 18:33:26 
+ * @Last Modified by: Rain120
+ * @Last Modified time: 2018-09-06 23:36:43
+ */
 
 import * as React from 'react';
 import {
   Button,
+  Select,
 } from 'antd';
 import * as RCS from 'recharts';
 import AnalysisHeader from "../AnalysisHeader/AnalysisHeader";
 import Charts from "../Charts/Charts";
 import classNames from 'classnames';
 import './Analysis.scss';
+import * as API from '../../api/data';
+import { ERR_OK, TIME_FORMATTER_TOMINUTE } from "../../utils/config";
 import * as moment from 'moment';
-import { TIME_FORMATTER } from "../../utils/config";
 
 interface AnalysisProps {
-  show?: any
+  show?: any,
+  analysisData?: any
 }
 
-export default class Analysis extends React.PureComponent<AnalysisProps> {
-  public dataDemo = [
-    {
-      time: 1523803000000,
-      origin: 4000,
-      limit: [2400, 3000],
-      ano: 4000
-    },
-    {
-      time: 1523803180000,
-      origin: 3000,
-      limit: [-3200, 5398],
-      ano: 3000
-    },
-    {
-      time: 1523803184000,
-      origin: 3200,
-      limit: [-3800, 6398],
-      ano: 3200
-    },
-    {
-      time: 1523803188000,
-      origin: 2900,
-      limit: [-4500, 4398],
-      ano: 2900
-    },
-    {
-      time: 1523803189000,
-      origin: 4000,
-      limit: [2200, 4498],
-      ano: 4000
-    },
-    {
-      time: 1523803200000,
-      origin: 5200,
-      limit: [3200, 5798],
-      ano: 5200
-    },
-    {
-      time: 1523803203300,
-      origin: 2000,
-      limit: [5600, 9800]
-    },
-    {
-      time: 1523803213300,
-      origin: 2780,
-      limit: [-2800, 1908],
-      ano: 2780
-    },
-    {
-      time: 1523803222300,
-      origin: 1890,
-      limit: [1200, 4800],
-      ano: 1890
-    },
-    {
-      time: 1523803233300,
-      origin: 2390,
-      limit: [-3500, 1800]
-    },
-    {
-      time: 1523803234300,
-      origin: 3490,
-      limit: [-2800, 2300],
-      ano: 3490
-    },
-    {
-      time: 1523803235300,
-      origin: 2000,
-      limit: [5600, 9800]
-    },
-    {
-      time: 1523803236300,
-      origin: 2780,
-      limit: [-2800, 1908],
-      ano: 2780
-    },
-    {
-      time: 1523803237300,
-      origin: 1890,
-      limit: [1200, 4800],
-      ano: 1890
-    },
-    {
-      time: 1523803284300,
-      origin: 2390,
-      limit: [-3500, 1800]
-    },
-  ];
+const Option = Select.Option;
 
+export default class Analysis extends React.PureComponent<AnalysisProps> {
+  
   public state = {
     demo: true,
-    data: this.dataDemo,
+    data: [],
     refAreaLeft : '',
     refAreaRight : '',
-    animation : true
+    animation : true,
+    resetData: 0,
+    lists: [],
+    brushData: [],
   };
 
   constructor(props) {
     super(props)
   }
 
+  public componentWillReceiveProps(analysis) {
+    let data = [{}];
+    for (const key in analysis.analysisData) {
+      if (analysis.analysisData.hasOwnProperty(key)) {
+        console.log(key, analysis.analysisData[key]);
+        let alyData = analysis.analysisData[key].map(item => item.t * 1000);
+        console.log(alyData);
+        data.push({
+          algorithm: key,
+          data: alyData,
+          brushData: alyData
+        })
+        this.setState({
+          data
+        })
+      }
+    }
+  }
+
+  public componentDidMount() {
+    let lists = [{}];
+    API.getLists().then(res => {
+      if (ERR_OK === res.status) {
+        res.data.map(algorithm => {
+          lists.push({
+            name: algorithm.name,
+            description: algorithm.description,
+            params: algorithm.params
+          })
+        })
+      }
+      this.setState({
+          lists  
+      });
+    });
+  }
+
   public reset = () => {
     const { data } = this.state;
+    let { resetData } = this.state;
   	this.setState({
-      data : data.slice(),
+      data : data.map((item:any) => item.data && item.data.slice()),
       refAreaLeft : '',
-      refAreaRight : ''
+      refAreaRight : '',
+      resetData: resetData++,
     });
+  }
+  public handleChange = (value) => {
+    console.log(value);
   }
 
   public render () {
     const { 
       demo,
       data,
-    } = this.state
+      resetData,
+      lists,
+      brushData,
+    } = this.state;
 
     const {
       show
-    } = this.props
+    } = this.props;
 
     return (
       <div className={classNames("analysis-wrapper", show)}>
         <div className="ret-title">
           <p className="hint-title">{ demo ? '样本数据' : '分析结果' }</p>
+          <div className="file">
+            <Select defaultValue="aperiodic" style={{ width: 180, float: "left" }} onChange={this.handleChange}>
+              <Option value="periodic">periodicDemo.csv</Option>
+              <Option value="aperiodic">aperiodicDemo.csv</Option>
+            </Select>
+          </div>
         </div>
-        <AnalysisHeader />
+        <AnalysisHeader lists={lists}/>
         <div className="charts-header">
           <div className="reset">
             <Button 
@@ -157,27 +134,26 @@ export default class Analysis extends React.PureComponent<AnalysisProps> {
             height={60}
           >
             <RCS.ComposedChart
-              data={data}
+              data={brushData}
               syncId="analysis-result"
             >
-              <RCS.Line type="monotone" dataKey="origin" name="原始值" stroke="#fff" />
+              <RCS.Line type="monotone" dataKey="o" name="原始值" stroke="#fff" />
               <RCS.Brush
-                name="原始值"
-                dataKey="time"
-                tickFormatter={(time)=> moment(time).format(TIME_FORMATTER) }
-              >
-                <RCS.LineChart syncId="compare">
-                  <RCS.CartesianGrid stroke="#f5f5f5" fill="#e6e6e6" />
-                  <RCS.YAxis hide={true} domain={["auto", "auto"]} />
-                  <RCS.Line type="monotone" dataKey="origin" name="原始值" stroke="#7eb26d" />
-                </RCS.LineChart>
-              </RCS.Brush>
+                dataKey="t"
+                tickFormatter={t => moment(t).format(TIME_FORMATTER_TOMINUTE)}
+              />
             </RCS.ComposedChart>
           </RCS.ResponsiveContainer>
           <div style={{width: '4%'}} />
         </div>
-        <Charts data={data} />
-        <Charts data={data} />
+        {
+          data.map((item:any) => item.algorithm && (
+            <div className="chart-list" key={item.algorithm}>
+              <p className="algo-title">{item.algorithm}算法分析结果</p>
+              <Charts data={item.data} reset={resetData}/>
+            </div>
+          ))
+        }
       </div>
     )
   }

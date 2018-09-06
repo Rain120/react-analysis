@@ -8,6 +8,8 @@ import * as React from 'react';
 import classNames from 'classnames'
 import Analysis from "../Analysis/Analysis";
 import './Platform.scss';
+import * as API from '../../api/data';
+import { ERR_OK } from "../../utils/config";
 
 const TabPane = Tabs.TabPane;
 const confirm = Modal.confirm;
@@ -27,10 +29,50 @@ export default class Platform extends React.PureComponent {
     currentFeatures: 'analysis',
     analyzing: false,
     predicting: false,
+    data: [],
+    lists: [],
   };
 
   constructor(props) {
     super(props);
+  }
+
+  public componentDidMount() {
+    let demos = [{
+      "fileId":"periodicDemo.csv",
+      "algorithms": [{
+        "name":"isolation_forest",
+        "params": null
+      }, {
+        "name":"3Sigma", 
+        "params": null
+      }, {
+        "name":"Cloudwiz_DT", 
+        "params": null
+      }]
+    }, {
+      "fileId":"aperiodicDemo.csv",
+      "algorithms": [{
+        "name":"isolation_forest",
+        "params": null
+      }, {
+        "name":"3Sigma", 
+        "params": null
+      }, {
+        "name":"Cloudwiz_DT", 
+        "params": null
+      }]
+    }];
+
+    Promise.all([API.getDetect(demos[0]), API.getDetect(demos[1])]).then(res => {
+      res.map(item => {
+        if (ERR_OK === item.status) {
+          this.setState({
+            data: item.data.d,
+          })
+        }
+      });
+    });
   }
 
   public remove = (targetKey) => {
@@ -102,7 +144,8 @@ export default class Platform extends React.PureComponent {
       currentFeatures,
       analyzing,
       predicting,
-    } = this.state
+      data,
+    } = this.state;
 
     return (
       <div className="platform-wrapper">
@@ -142,7 +185,9 @@ export default class Platform extends React.PureComponent {
                   </Button>
                 </div>
               </div>
-              <Analysis show={currentFeatures === 'analysis' ? 'show' : 'hide'}/>
+              <Analysis
+              analysisData={data}
+              show={currentFeatures === 'analysis' ? 'show' : 'hide'}/>
             </TabPane>)
           }
         </Tabs>
