@@ -2,14 +2,14 @@
  * @Author: Rain120 
  * @Date: 2018-08-31 10:31:24 
  * @Last Modified by: Rain120
- * @Last Modified time: 2018-09-06 20:47:25
+ * @Last Modified time: 2018-09-07 10:10:57
  */
 
 import * as React from 'react';
 import * as RCS from 'recharts';
 import './Charts.scss';
 import * as moment from 'moment';
-import { TIME_FORMATTER } from "../../utils/config";
+import { TIME_FORMATTER, TIME_FORMATTER_TOMINUTE } from "../../utils/config";
 interface ChartsProps {
   data?: any,
   reset?: any,
@@ -37,17 +37,18 @@ export default class Charts extends React.PureComponent<ChartsProps> {
   }  
 
   public getAxisYDomain = (data, ref, offset = 0) => {
+    console.log(213, data)
     let [ bottom, top ] = [ data[0][ref], data[0][ref] ];
     data.forEach( d => {
       if (d[ref] > top) {
-        top = Math.max(d[ref], d.t[1]);
+        top = Math.max(d[ref], d.l[1]);
       } else {
-        top = Math.max(top, d.t[1]);
+        top = Math.max(top, d.l[1]);
       }
       if (d[ref] < bottom) {
-        bottom = Math.min(d[ref], d.t[0]);
+        bottom = Math.min(d[ref], d.l[0]);
       } else {
-        bottom = Math.min(bottom, d.t[0]);
+        bottom = Math.min(bottom, d.l[0]);
       }
     });
     return [ (bottom | 0) - offset, (top | 0) + offset ]
@@ -134,10 +135,10 @@ export default class Charts extends React.PureComponent<ChartsProps> {
             syncId="analysis-result"
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             onMouseDown = { 
-              e => e.activeLabel && this.setState({refAreaLeft: e.activeLabel})
+              e => e && e.activeLabel && this.setState({refAreaLeft: e.activeLabel})
             }
             onMouseMove = { 
-              e => e.activeLabel && this.state.refAreaLeft && this.setState({refAreaRight: e.activeLabel}) 
+              e => e && e.activeLabel && this.state.refAreaLeft && this.setState({refAreaRight: e.activeLabel}) 
             }
             onMouseUp = { this.zoom }
           >
@@ -160,6 +161,10 @@ export default class Charts extends React.PureComponent<ChartsProps> {
               labelFormatter={(t)=> moment(t).format(TIME_FORMATTER) }
             />
             <RCS.Legend style={{marginLeft: '2rem'}} />
+            <RCS.Brush
+              dataKey="t"
+              tickFormatter={t => moment(t).format(TIME_FORMATTER_TOMINUTE)}
+            />
             <RCS.Area
               type="monotone"
               name="上下限"
@@ -182,7 +187,7 @@ export default class Charts extends React.PureComponent<ChartsProps> {
               name="异常点" 
               dataKey="a" 
               yAxisId="realdata" 
-              stroke="none"
+              stroke="red"
               dot={{ stroke: 'red', fill: 'red' }}
               ifOverflow={"extendDomain"} 
               fill="none" 

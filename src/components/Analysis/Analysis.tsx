@@ -2,7 +2,7 @@
  * @Author: Rain120 
  * @Date: 2018-09-04 18:33:26 
  * @Last Modified by: Rain120
- * @Last Modified time: 2018-09-06 23:36:43
+ * @Last Modified time: 2018-09-07 11:44:43
  */
 
 import * as React from 'react';
@@ -10,14 +10,15 @@ import {
   Button,
   Select,
 } from 'antd';
-import * as RCS from 'recharts';
 import AnalysisHeader from "../AnalysisHeader/AnalysisHeader";
 import Charts from "../Charts/Charts";
 import classNames from 'classnames';
 import './Analysis.scss';
 import * as API from '../../api/data';
 import { ERR_OK, TIME_FORMATTER_TOMINUTE } from "../../utils/config";
+import { isEmptyObject } from "../../utils/utils";
 import * as moment from 'moment';
+import * as RCS from 'recharts';
 
 interface AnalysisProps {
   show?: any,
@@ -28,6 +29,8 @@ const Option = Select.Option;
 
 export default class Analysis extends React.PureComponent<AnalysisProps> {
   
+
+
   public state = {
     demo: true,
     data: [],
@@ -42,28 +45,15 @@ export default class Analysis extends React.PureComponent<AnalysisProps> {
   constructor(props) {
     super(props)
   }
-
-  public componentWillReceiveProps(analysis) {
-    let data = [{}];
-    for (const key in analysis.analysisData) {
-      if (analysis.analysisData.hasOwnProperty(key)) {
-        console.log(key, analysis.analysisData[key]);
-        let alyData = analysis.analysisData[key].map(item => item.t * 1000);
-        console.log(alyData);
-        data.push({
-          algorithm: key,
-          data: alyData,
-          brushData: alyData
-        })
-        this.setState({
-          data
-        })
-      }
-    }
+  public componentWillReceiveProps(data) {
+    this.setState({
+      data: data.analysisData,
+      brushData: data.analysisData.brushData
+    })
   }
-
+  
   public componentDidMount() {
-    let lists = [{}];
+    let lists = Array<any>();
     API.getLists().then(res => {
       if (ERR_OK === res.status) {
         res.data.map(algorithm => {
@@ -73,6 +63,9 @@ export default class Analysis extends React.PureComponent<AnalysisProps> {
             params: algorithm.params
           })
         })
+      }
+      if (!isEmptyObject(lists)) {
+        lists = lists;
       }
       this.setState({
           lists  
@@ -110,22 +103,25 @@ export default class Analysis extends React.PureComponent<AnalysisProps> {
     return (
       <div className={classNames("analysis-wrapper", show)}>
         <div className="ret-title">
-          <p className="hint-title">{ demo ? '样本数据' : '分析结果' }</p>
+          <p className={classNames("hint-title", { "show": demo }, { "hide": !demo })}>{ demo ? '样本数据' : '分析结果' }</p>
           <div className="file">
-            <Select defaultValue="aperiodic" style={{ width: 180, float: "left" }} onChange={this.handleChange}>
+            <Select defaultValue="periodic" style={{ width: 180, float: "left" }} onChange={this.handleChange}>
               <Option value="periodic">periodicDemo.csv</Option>
               <Option value="aperiodic">aperiodicDemo.csv</Option>
             </Select>
           </div>
         </div>
-        <AnalysisHeader lists={lists}/>
+        <AnalysisHeader 
+          lists={lists}
+          // fileInfo={}
+        />
         <div className="charts-header">
           <div className="reset">
             <Button 
             type="primary"
             onClick={this.reset}
             >
-              重置
+              恢复时间选择
             </Button>
           </div>
           <RCS.ResponsiveContainer
@@ -137,7 +133,11 @@ export default class Analysis extends React.PureComponent<AnalysisProps> {
               data={brushData}
               syncId="analysis-result"
             >
-              <RCS.Line type="monotone" dataKey="o" name="原始值" stroke="#fff" />
+              <RCS.Line
+                type="monotone" 
+                dataKey="o" 
+                name="原始值" 
+                stroke="red" />
               <RCS.Brush
                 dataKey="t"
                 tickFormatter={t => moment(t).format(TIME_FORMATTER_TOMINUTE)}

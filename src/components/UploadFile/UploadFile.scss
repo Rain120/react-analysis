@@ -1,11 +1,11 @@
 .upload-file-wrapper {
   width: 80%;
-  height: 170px;
+  height: 140px;
   margin: 1rem auto;
   border: 1px solid #ccc;
   display: flex;
   .upload-file {
-    flex: 1;
+    width: 30%;
     height: 120px;
     margin: .5rem;
     .ant-upload-drag-icon {
@@ -13,7 +13,7 @@
     }
   }
   .file-info {
-    width: 70%;
+    flex: 1;
     margin: .5rem;
     .title {
       font-size: 1.2rem;

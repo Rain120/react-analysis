@@ -1,3 +1,18 @@
+/*
+ * @Author: Rain120 
+ * @Date: 2018-09-07 10:20:50 
+ * @Last Modified by: Rain120
+ * @Last Modified time: 2018-09-07 11:25:35
+ */
+export function isEmptyObject(object) {
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // export function formatRange (range) {
 //   let value = getRangeValue(range);
 //   let symbol = getSymbol(range);

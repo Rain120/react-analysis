@@ -1,13 +1,21 @@
 import { Icon, Upload, message, Modal } from 'antd';
 import * as React from 'react';
 import './UploadFile.scss';
+import * as moment from 'moment';
+import { TIME_FORMATTER_TOMINUTE } from "../../utils/config";
+import { isEmptyObject } from "../../utils/utils";
 
 const Dragger = Upload.Dragger;
 const confirm = Modal.confirm;
 
-export default class UploadFile extends React.PureComponent {
+interface UploadFileProps {
+  fileInfo?: any
+}
+
+export default class UploadFile extends React.PureComponent<UploadFileProps> {
   public state = {
-    uploadFile: {}
+    uploadFile: {},
+    fileInfo: this.props.fileInfo
   };
 
   constructor(props) {
@@ -17,7 +25,28 @@ export default class UploadFile extends React.PureComponent {
   public onChange = (info) => {
     const status = info.file.status;
     if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
+      let finfo = [{}];
+      info.fileList.map(item => {
+        finfo.push({
+          name: item.response.filename,
+          fileId: item.response.fileId,
+          dataCount: item.response.dataCount,
+          minDate: moment(item.response.minDate * 1000).format(TIME_FORMATTER_TOMINUTE),
+          maxDate: moment(item.response.maxDate * 1000).format(TIME_FORMATTER_TOMINUTE),
+        })
+      });
+      let f = Array<any>();
+      finfo.map(item => {
+        if (isEmptyObject) {
+          return;
+        }
+        f.push(item);
+        console.log(123, f, item);
+      });
+      this.setState({
+        fileInfo: finfo
+      })
+      console.log(info.file, info.fileList[0].response);
     }
     if (status === 'done') {
       message.success(`${info.file.name} file uploaded successfully.`);
@@ -61,10 +90,14 @@ export default class UploadFile extends React.PureComponent {
   }
 
   public render() {
+    const { fileInfo } = this.state;
+    console.log(11111, fileInfo);
+    
     const props = {
       name: 'file',
       action: 'http://192.168.1.204:23456/anomalyOfflineDetect/upload',
       multiple: false,
+      showUploadList: false,
       onRemove: file => this.onRemove(file),
       beforeUpload: (file) => this.beforeUpload(file),
       onChange: info => this.onChange(info),
@@ -83,21 +116,25 @@ export default class UploadFile extends React.PureComponent {
             </div>
           </Dragger>
         </div>
-        <div className="file-info">
-          <p className="title">文件信息</p>
-          <div className="file-common file-name">
-            <span>文件名: a.csv</span>
-          </div>
-          <div className="file-common file-size">
-            <span>文件大小: 100k</span>
-          </div>
-          <div className="file-common file-date">
-            <span>数据点: 10000个</span>
-          </div>
-          <div className="file-common file-time-domain">
-            <span>时间区域: 2018.3.12 00:00 - 2018.3.21 23:59</span>
-          </div>
-        </div>
+        {/*
+          fileInfo.map((item: any) => (
+            <div className="file-info">
+              <p className="title">文件信息</p>
+              <div className="file-common file-name">
+                <span>文件名: {item.response.name}</span>
+              </div>
+              <div className="file-common file-size">
+                <span>文件大小: {item.response.dataCount}</span>
+              </div>
+              <div className="file-common file-date">
+                <span>数据点: {item.response.dataCount}个</span>
+              </div>
+              <div className="file-common file-time-domain">
+                <span>时间区域: {item.response.minDate} - {item.response.minDate}</span>
+              </div>
+            </div>
+          )
+        )*/}
       </div>
     );
   }

@@ -10,6 +10,7 @@ import Analysis from "../Analysis/Analysis";
 import './Platform.scss';
 import * as API from '../../api/data';
 import { ERR_OK } from "../../utils/config";
+import { isEmptyObject } from "../../utils/utils";
 
 const TabPane = Tabs.TabPane;
 const confirm = Modal.confirm;
@@ -38,19 +39,7 @@ export default class Platform extends React.PureComponent {
   }
 
   public componentDidMount() {
-    let demos = [{
-      "fileId":"periodicDemo.csv",
-      "algorithms": [{
-        "name":"isolation_forest",
-        "params": null
-      }, {
-        "name":"3Sigma", 
-        "params": null
-      }, {
-        "name":"Cloudwiz_DT", 
-        "params": null
-      }]
-    }, {
+    let demoData = {
       "fileId":"aperiodicDemo.csv",
       "algorithms": [{
         "name":"isolation_forest",
@@ -62,16 +51,49 @@ export default class Platform extends React.PureComponent {
         "name":"Cloudwiz_DT", 
         "params": null
       }]
-    }];
+    };
+    // , {
+    //   "fileId":"aperiodicDemo.csv",
+    //   "algorithms": [{
+    //     "name":"isolation_forest",
+    //     "params": null
+    //   }, {
+    //     "name":"3Sigma", 
+    //     "params": null
+    //   }, {
+    //     "name":"Cloudwiz_DT", 
+    //     "params": null
+    //   }]
+    // }
 
-    Promise.all([API.getDetect(demos[0]), API.getDetect(demos[1])]).then(res => {
-      res.map(item => {
-        if (ERR_OK === item.status) {
-          this.setState({
-            data: item.data.d,
-          })
+    API.getDetect(demoData).then(res => {
+      if (ERR_OK === res.status) {
+        let data = Array<any>();
+        let d = res.data.d;
+        for (const key in d) {
+          if (d.hasOwnProperty(key)) {
+            let alyData = d[key].map(item => {
+              item.t = item.t * 1000;
+              return item;
+            });
+            data.push({
+              algorithm: key,
+              data: alyData,
+              brushData: alyData
+            });
+          }
         }
-      });
+        let da = Array<any>();        
+        data.map(item => {
+          if (isEmptyObject(item)) {
+            return;
+          }
+          da.push(item);
+        });
+        this.setState({
+          data: da
+        })
+      }
     });
   }
 
