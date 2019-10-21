@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-let url = "http://192.168.1.204:23456/anomalyOfflineDetect"
+let url = "your server"
 
 export function getDetect (algorithm) {
   return axios.post(`${url}/detect`, algorithm).then(res => {
